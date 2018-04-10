@@ -1,3 +1,9 @@
+{{#hasadminlink}}
+    <div class="siteadminlink nav-item nav-link">
+        <a href="{{{siteadminurl}}}" data-tooltip="tooltip" data-placement= "bottom" title="{{{siteadmintitle}}}" class="btn btn-secondary fhs-tooltip"><i class="fa fa-sitemap" aria-hidden="true"></i></a>
+    </div>
+{{/hasadminlink}}
+
 {{#showincourseonly}}
     {{#hasteacherdash}}
     <div class="teacherdash nav-item nav-link">
@@ -21,12 +27,6 @@
     </div>
     {{/hasstudentdash}}
 {{/showincourseonly}}
-
-{{#hasadminlink}}
-    <div class="siteadminlink nav-item nav-link">
-        <a href="{{{siteadminurl}}}" data-tooltip="tooltip" data-placement= "bottom" title="{{{siteadmintitle}}}" class="btn btn-secondary fhs-tooltip"><i class="fa fa-sitemap" aria-hidden="true"></i></a>
-    </div>
-{{/hasadminlink}}
 
 {{#haseditcog}}
     <div class="editcogbutton">{{{editcog}}}</div>
