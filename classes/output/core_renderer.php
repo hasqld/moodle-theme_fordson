@@ -316,6 +316,85 @@ class core_renderer extends \theme_boost\output\core_renderer {
 
         $menu = new custom_menu();
 
+        require_once($CFG->dirroot.'/course/lib.php');
+        require_once($CFG->dirroot.'/lib/coursecatlib.php');
+
+        // List course categories where user has manager role
+        if (user_has_role_assignment($USER->id, 1)) {
+             // Add "other" branch
+            $branch_other = $menu->add('Other', null, 'Other Course Roles', -1);
+
+            global $DB;
+            // get all course categories (contextlevel=40) where user (userid) has manager role (roleid=1)
+            $sql = "SELECT mc.instanceid, cc.name FROM {role_assignments} mra, {context} mc, {course_categories} cc WHERE mra.roleid = :roleid AND mra.userid = :userid AND mc.id = mra.contextid AND mc.contextlevel = :coursecatcontext AND cc.id = mc.instanceid";
+            $params['userid'] = $USER->id;
+            $params['roleid'] = 1;
+            $params['coursecatcontext'] = 40;
+            $rs = $DB->get_recordset_sql($sql, $params);
+            // for each of these categories create a menu link to view its courses
+            foreach ($rs as $record) {
+                $branchtitle = 'All '.$record->name.' courses';
+                $branchlabel = $record->name;
+                $branchurl = new moodle_url('/course/index.php', array('categoryid' => $record->instanceid));
+                $branch_other->add($branchlabel, $branchurl, $branchtitle);
+            }
+        }
+
+        // Add "non-academic" branch
+        $branch_non_academic = $menu->add('Non-Academic', null, 'Non-Academic Courses', -2);
+
+        // Add "courses" branch and then "all courses" item
+        $branch = $menu->add('Courses', null, 'Courses', -3);
+        $branch->add('All Courses', new moodle_url('/course/index.php', null), 'All Courses');
+
+        // Retrieve courses and add them to the menu when they are visible
+        $numcourses = 0;
+        if ($courses = enrol_get_my_courses(NULL, 'fullname ASC')) {
+            foreach ($courses as $course) {
+                // find root category for this course
+                global $DB;
+                $course_category = $DB->get_record('course_categories',array('id'=>$course->category));
+                $category_path = explode('/',$course_category->path);
+                $root_category_id = $category_path[1];
+                // academic courses in the Courses menu
+                if ($root_category_id == 2) {
+                    if ($course->visible) {
+                        $branch->add('<i class="fa fa-cubes"></i>' . format_string($course->fullname), new moodle_url('/course/view.php?id=' . $course->id), format_string($course->shortname));
+                        $numcourses += 1;
+                    // and hidden course if we have the capability
+                    } /*else if (has_capability('moodle/course:viewhiddencourses', context_system::instance())) {
+                        $branchtitle = format_string($course->shortname);
+                        $branchlabel = '<span class="dimmed_text"><i class="fa fa-eye-slash"></i>' . format_string($course->fullname) . '</span>';
+                        $branchurl = new moodle_url('/course/view.php', array('id' =>$course->id));
+                        $branch->add($branchlabel, $branchurl, $branchtitle);
+                        $numcourses += 1;
+                    } */
+                }
+                // non-academic courses in the Non-Academic Menu
+                if ($root_category_id != 2) {
+                    if ($course->visible) {
+                        $branch_non_academic->add('<i class="fa fa-cubes"></i>' . format_string($course->fullname), new moodle_url('/course/view.php?id=' . $course->id), format_string($course->shortname));
+                        $numcourses += 1;
+                    // and hidden course if we have the capability
+                    } /*else if (has_capability('moodle/course:viewhiddencourses', context_system::instance())) {
+                        $branchtitle = format_string($course->shortname);
+                        $branchlabel = '<span class="dimmed_text"><i class="fa fa-eye-slash"></i>' . format_string($course->fullname) . '</span>';
+                        $branchurl = new moodle_url('/course/view.php', array('id' =>$course->id));
+                        $branch_non_academic->add($branchlabel, $branchurl, $branchtitle);
+                        $numcourses += 1;
+                    } */
+                }
+            }
+            // courses were added so we must be logged in so let's add a link to the custom course files report if we have manager capability here
+            $courseid = $COURSE->id;
+            $coursesn = $COURSE->shortname;
+            $coursectxt = get_context_instance(CONTEXT_COURSE, $courseid);
+            if ($courseid != 1 && has_capability('moodle/course:update', $coursectxt)) {
+                $branch->add('', new moodle_url('#', null), '');
+                $branch->add('<i class="fa fa-list"></i>Course Files Report', new moodle_url('/blocks/configurable_reports/viewreport.php?id=4&courseid=1&filter_courses='.$courseid, null), 'Report For '.$coursesn);
+            }
+        }
+
         $hasdisplaymycourses = (empty($this->page->theme->settings->displaymycourses)) ? false : $this->page->theme->settings->displaymycourses;
         $hasdisplaythiscourse = (empty($this->page->theme->settings->displaythiscourse)) ? false : $this->page->theme->settings->displaythiscourse;
         if (isloggedin() && !isguestuser() && ($hasdisplaymycourses || $hasdisplaythiscourse)) {

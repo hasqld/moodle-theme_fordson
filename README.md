@@ -2,6 +2,7 @@ THEME_Fordson
 ===========
 
 # Fordson (Hillbrook Modified Version)
+## Fordson Moodle 34 version 1.7 2018020309 Hillbrook
 
 Fordson is a child theme for Moodle's core theme Boost.
 It is built on Boostrap4 and Mustache templates.
