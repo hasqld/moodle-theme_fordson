@@ -100,6 +100,11 @@ class core_renderer extends \theme_boost\output\core_renderer {
         $html .= html_writer::end_div();
         $html .= html_writer::end_div();
         $html .= html_writer::end_div();
+        // OCJ HILLBROOK MOD
+        $html .= html_writer::start_div('hbdata');
+        require_once('hillbrook_html_includes.php');
+        $html .= html_writer::end_div();
+        // OCJ END HILLBROOK MOD
         $html .= html_writer::end_tag('header');
         return $html;
     }
@@ -306,7 +311,7 @@ class core_renderer extends \theme_boost\output\core_renderer {
      * This renderer is needed to enable the Bootstrap style navigation.
     */
     public function fordson_custom_menu() {
-        global $CFG, $COURSE, $PAGE, $OUTPUT;
+        global $CFG, $COURSE, $PAGE, $OUTPUT, $USER;
         $context = $this->page->context;
 
         $menu = new custom_menu();
