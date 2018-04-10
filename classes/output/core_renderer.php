@@ -317,7 +317,8 @@ class core_renderer extends \theme_boost\output\core_renderer {
         $menu = new custom_menu();
 
         $hasdisplaymycourses = (empty($this->page->theme->settings->displaymycourses)) ? false : $this->page->theme->settings->displaymycourses;
-        if (isloggedin() && !isguestuser() && $hasdisplaymycourses) {
+        $hasdisplaythiscourse = (empty($this->page->theme->settings->displaythiscourse)) ? false : $this->page->theme->settings->displaythiscourse;
+        if (isloggedin() && !isguestuser() && ($hasdisplaymycourses || $hasdisplaythiscourse)) {
             $mycoursetitle = $this->page->theme->settings->mycoursetitle;
             if ($mycoursetitle == 'module') {
                 $branchtitle = get_string('mymodules', 'theme_fordson');
@@ -368,6 +369,9 @@ class core_renderer extends \theme_boost\output\core_renderer {
                 $thisbranchtitle = get_string('thismycourses', 'theme_fordson');
                 $homebranchtitle = get_string('homemycourses', 'theme_fordson');
             }
+        }
+
+        if (isloggedin() && !isguestuser() && $hasdisplaymycourses) {
             $branchlabel = $branchtitle;
             $branchurl = new moodle_url('/my/index.php');
             $branchsort = 10000;
@@ -389,12 +393,14 @@ class core_renderer extends \theme_boost\output\core_renderer {
                 $noenrolments = get_string('noenrolments', 'theme_fordson');
                 $branch->add('<em>' . $noenrolments . '</em>', new moodle_url('/') , $noenrolments);
             }
+        }
 
-            $hasdisplaythiscourse = (empty($this->page->theme->settings->displaythiscourse)) ? false : $this->page->theme->settings->displaythiscourse;
+        if (isloggedin() && !isguestuser() && $hasdisplaythiscourse) {
             $sections = $this->generate_sections_and_activities($COURSE);
             if ($sections && $COURSE->id > 1 && $hasdisplaythiscourse) {
                 
                 $branchlabel = $thisbranchtitle;
+                $branchsort = -10;
                 $branch = $menu->add($branchlabel, $branchurl, $branchtitle, $branchsort);
                 $course = course_get_format($COURSE)->get_course();
 
@@ -438,7 +444,6 @@ class core_renderer extends \theme_boost\output\core_renderer {
                     $branch->add(format_string($sectionname) , new moodle_url($sectionurl) , format_string($sectionname));
                 }
             }
-
         }
 
         $content = '';
