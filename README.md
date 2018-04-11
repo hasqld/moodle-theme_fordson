@@ -4,6 +4,13 @@ THEME_Fordson
 # Fordson (Hillbrook Modified Version)
 ## Fordson Moodle 34 version 1.7 2018020309 Hillbrook
 
+## NOTE on added compatibility between Fordson's "This Course" dropdown and the Grid course format
+A slightly dodgy effort to get the "This Course" menu working with Grid format:
+* forked moodle-format_grid to https://github.com/hasqld/moodle-format_grid
+* added code to its module.js in function M.format_grid.init
+* Grid already parsed navdrawer items to add click listeners to section links
+* It now also parses dropdown-menu items to add click listeners to section links
+
 Fordson is a child theme for Moodle's core theme Boost.
 It is built on Boostrap4 and Mustache templates.
 
